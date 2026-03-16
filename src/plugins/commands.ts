@@ -253,6 +253,10 @@ export async function executePluginCommand(params: {
   to?: PluginCommandContext["to"];
   accountId?: PluginCommandContext["accountId"];
   messageThreadId?: PluginCommandContext["messageThreadId"];
+  mediaPath?: PluginCommandContext["mediaPath"];
+  mediaPaths?: PluginCommandContext["mediaPaths"];
+  mediaType?: PluginCommandContext["mediaType"];
+  mediaTypes?: PluginCommandContext["mediaTypes"];
 }): Promise<PluginCommandResult> {
   const { command, args, senderId, channel, isAuthorizedSender, commandBody, config } = params;
 
@@ -280,6 +284,10 @@ export async function executePluginCommand(params: {
     to: params.to,
     accountId: params.accountId,
     messageThreadId: params.messageThreadId,
+    mediaPath: params.mediaPath,
+    mediaPaths: params.mediaPaths,
+    mediaType: params.mediaType,
+    mediaTypes: params.mediaTypes,
   };
 
   // Lock registry during execution to prevent concurrent modifications

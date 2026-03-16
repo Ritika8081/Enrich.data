@@ -44,6 +44,10 @@ export const handlePluginCommand: CommandHandler = async (
     accountId: params.ctx.AccountId ?? undefined,
     messageThreadId:
       typeof params.ctx.MessageThreadId === "number" ? params.ctx.MessageThreadId : undefined,
+    mediaPath: params.ctx.MediaPath,
+    mediaPaths: params.ctx.MediaPaths,
+    mediaType: params.ctx.MediaType,
+    mediaTypes: params.ctx.MediaTypes,
   });
 
   return {

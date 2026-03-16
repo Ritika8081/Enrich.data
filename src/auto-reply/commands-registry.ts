@@ -377,12 +377,47 @@ export function resolveCommandArgMenu(params: {
 
 export function normalizeCommandBody(raw: string, options?: CommandNormalizeOptions): string {
   const trimmed = raw.trim();
-  if (!trimmed.startsWith("/")) {
-    return trimmed;
+
+  const isAttachmentLabelLine = (line: string): boolean => {
+    const normalized = line.trim();
+    if (!normalized) {
+      return false;
+    }
+    if (normalized.startsWith("<media:")) {
+      return true;
+    }
+    if (/^[📎🖇]/u.test(normalized)) {
+      return true;
+    }
+    if (
+      /\.(csv|xlsx|xls|txt|tsv|pdf|docx?|png|jpe?g|gif|webp|mp3|wav|ogg|mp4|mov|zip)(\s|$)/i.test(
+        normalized,
+      )
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  let normalizedInput = trimmed;
+  if (!normalizedInput.startsWith("/")) {
+    const lines = normalizedInput
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const commandIndex = lines.findIndex((line) => line.startsWith("/"));
+    if (
+      commandIndex > 0 &&
+      lines.slice(0, commandIndex).every((line) => isAttachmentLabelLine(line))
+    ) {
+      normalizedInput = lines[commandIndex] ?? normalizedInput;
+    } else {
+      return trimmed;
+    }
   }
 
-  const newline = trimmed.indexOf("\n");
-  const singleLine = newline === -1 ? trimmed : trimmed.slice(0, newline).trim();
+  const newline = normalizedInput.indexOf("\n");
+  const singleLine = newline === -1 ? normalizedInput : normalizedInput.slice(0, newline).trim();
 
   const colonMatch = singleLine.match(/^\/([^\s:]+)\s*:(.*)$/);
   const normalized = colonMatch

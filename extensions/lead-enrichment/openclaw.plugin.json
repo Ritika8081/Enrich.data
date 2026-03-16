@@ -1,0 +1,39 @@
+{
+  "id": "lead-enrichment",
+  "name": "Lead Enrichment",
+  "description": "Social profile discovery (LinkedIn, GitHub, Twitter) from name, email, or phone.",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "serperApiKey": {
+        "type": "string",
+        "description": "Serper API key for profile discovery queries."
+      },
+      "tavilyApiKey": {
+        "type": "string",
+        "description": "Tavily API key for fallback profile discovery queries."
+      },
+      "braveApiKey": {
+        "type": "string",
+        "description": "Deprecated fallback: Brave Search API token. Prefer serperApiKey or SERPER_API_KEY."
+      },
+      "pdlApiKey": {
+        "type": "string",
+        "description": "People Data Labs API key used for primary enrichment before search corroboration."
+      },
+      "pdlApiUrl": {
+        "type": "string",
+        "description": "Optional People Data Labs endpoint override. Defaults to https://api.peopledatalabs.com/v5/person/enrich."
+      },
+      "hunterApiKey": {
+        "type": "string",
+        "description": "Hunter API key for people enrichment lookups."
+      },
+      "hunterApiUrl": {
+        "type": "string",
+        "description": "Optional Hunter endpoint override. Defaults to https://api.hunter.io/v2/people/find."
+      }
+    }
+  }
+}

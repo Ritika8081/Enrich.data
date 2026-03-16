@@ -166,6 +166,14 @@ export type PluginCommandContext = {
   accountId?: string;
   /** Thread/topic id if available */
   messageThreadId?: number;
+  /** First inbound media path for this command message, if present. */
+  mediaPath?: string;
+  /** Inbound media paths for this command message, if present. */
+  mediaPaths?: string[];
+  /** First inbound media content type for this command message, if present. */
+  mediaType?: string;
+  /** Inbound media content types for this command message, if present. */
+  mediaTypes?: string[];
 };
 
 /**

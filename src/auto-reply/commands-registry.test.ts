@@ -271,6 +271,16 @@ describe("commands registry", () => {
   it("normalizes dock command aliases", () => {
     expect(normalizeCommandBody("/dock_telegram")).toBe("/dock-telegram");
   });
+
+  it("normalizes command when preceded by attachment label line", () => {
+    expect(normalizeCommandBody("📎 fixit_whatsapp_agent_dev.d_leads (1).csv\n/leadfind")).toBe(
+      "/leadfind",
+    );
+  });
+
+  it("does not normalize command when preceding text is not attachment-like", () => {
+    expect(normalizeCommandBody("hello\n/leadfind")).toBe("hello\n/leadfind");
+  });
 });
 
 describe("commands registry args", () => {
