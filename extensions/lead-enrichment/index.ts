@@ -451,6 +451,18 @@ const plugin = {
         "Find public LinkedIn/GitHub/Twitter profiles for a lead or enrich attached CSV.",
       acceptsArgs: true,
       handler: async (ctx) => {
+        console.log("\n=== TELEGRAM REQUEST - API KEYS BEING USED ===");
+        console.log("Serper API Key:", serperApiKey ?? "(missing)");
+        console.log("Tavily API Key:", tavilyApiKey ?? "(missing)");
+        console.log("PDL API Key:", pdlApiKey ?? "(missing)");
+        console.log("Hunter API Key:", hunterApiKey ?? "(missing)");
+        console.log("Key sources:");
+        console.log("  Serper:", config.serperApiKey ? "plugin-config" : process.env.SERPER_API_KEY ? "env" : "missing");
+        console.log("  Tavily:", config.tavilyApiKey ? "plugin-config" : process.env.TAVILY_API_KEY ? "env" : "missing");
+        console.log("  PDL:", config.pdlApiKey ? "plugin-config" : process.env.PDL_API_KEY ? "env" : "missing");
+        console.log("  Hunter:", config.hunterApiKey ? "plugin-config" : process.env.HUNTER_API_KEY ? "env" : "missing");
+        console.log("================================================\n");
+
         if (!hasAllProviders) {
           return {
             text:

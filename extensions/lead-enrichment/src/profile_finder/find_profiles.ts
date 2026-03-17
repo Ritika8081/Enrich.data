@@ -1575,3 +1575,21 @@ export async function findProfiles(
     ...(options?.debug ? { queryDebug } : {}),
   };
 }
+
+// Normalize GitHub profile URLs to canonical form
+function normalizeGithubProfileUrl(url: string): string | null {
+  if (!url) return null;
+  try {
+    // Remove query params, fragments, trailing slashes, and force https
+    let cleaned = url.trim()
+      .replace(/^http:/, 'https:')
+      .replace(/\?.*$/, '')
+      .replace(/#.*/, '')
+      .replace(/\/$/, '');
+    // Match github.com/username only
+    const match = cleaned.match(/^https?:\/\/(www\.)?github\.com\/([A-Za-z0-9_-]+)$/);
+    return match ? `https://github.com/${match[2]}` : null;
+  } catch {
+    return null;
+  }
+}
