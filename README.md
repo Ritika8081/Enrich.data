@@ -1,8 +1,31 @@
 # Lead Enrichment
 
-> Turn a name (and maybe an email or phone) into a verified LinkedIn, GitHub, and Twitter profile - with a confidence score - plus a personalized cold email and LinkedIn DM - in seconds.
+> Turn a name (and maybe an email or phone) into verified LinkedIn, GitHub, and Twitter profiles - with confidence scores - plus a personalized cold email and LinkedIn DM, in seconds.
 
-**👉 [See a live demo (no install)](./extensions/lead-enrichment/docs/demo.html)** - open `extensions/lead-enrichment/docs/demo.html` in your browser to see what the bulk output looks like, with profile cards and AI-drafted outreach. No API keys needed.
+**👉 [See the live demo (no install)](./extensions/lead-enrichment/docs/demo.html)** - open `extensions/lead-enrichment/docs/demo.html` in your browser. Profile cards, AI-drafted outreach, real bulk output. No API keys needed.
+
+---
+
+## Why this project stands out
+
+| | |
+|---|---|
+| ⚡ **~100x faster than manual research** | What takes an SDR / recruiter 5-10 minutes per lead runs in seconds, end-to-end. |
+| 💸 **$0 on the default stack** | Every provider has a free tier, none require a credit card. Most enrichment tools start at $99/mo. |
+| 🛡️ **Four-provider fallback, no single point of failure** | Serper + Tavily run in parallel and dedup. If they miss, PDL takes over with retry + exponential backoff. Hunter is the final net for email-only inputs. |
+| 🎯 **Per-platform confidence scores** | LinkedIn 0.9, GitHub 0.86, Twitter 0.82 — not one fuzzy blended number. Downstream code can threshold per-channel. |
+| 🔌 **Provider-agnostic LLM** | Works with Groq, OpenAI, Together, or local Ollama by changing one env var. Outreach is fail-open — enrichment still completes if the LLM is down. |
+| 📦 **Zero-dependency HTML preview** | Bulk runs ship a self-contained HTML alongside the CSV — no framework, no server, drag-drop friendly. |
+| 🧪 **Production-grade resilience** | Honors `Retry-After` on 429, rejects webmail before billing Hunter, per-row error rows so one bad input never kills a batch of thousands. |
+| ✅ **Tested where it matters** | Vitest coverage on dedup logic, CSV parser/formatter, and the fallback chain — the parts that break silently. |
+
+### Strong points at a glance
+
+- **Resilience-first design** - dual search, retries with `Retry-After` honoring, fail-open AI, per-row error isolation.
+- **Cost-aware engineering** - webmail filter saves Hunter credits; provider chain stops at first hit; LLM swap requires no code change.
+- **Clean architecture** - TypeScript ESM, strict typing, plugin-shaped, dependency-injected, Vitest-tested.
+- **Real product polish** - confidence scores per platform, country inference from phone, drag-drop HTML preview.
+- **Drop-in for any pipeline** - CLI for humans, structured CSV+HTML output for downstream tools, OpenAI-compatible LLM interface for any host.
 
 ## What it does
 
@@ -43,14 +66,25 @@ name + email/phone
        confidence-scored profiles ◀───────┘
 ```
 
-Engineering decisions worth flagging:
-- Dual search (Serper + Tavily) - deduplicates results, continues if one provider 5xx's. No single point of failure.
-- Retry + exponential backoff - PDL: 2 retries, 300ms base, 12s timeout, honors `Retry-After` on 429.
-- Webmail rejection - Hunter never gets called for `@gmail.com` etc., saving credits and avoiding garbage matches.
-- Confidence per platform, not a single blended score - lets downstream code threshold per-channel (`linkedin >= 0.85`, `twitter >= 0.7`).
-- In-memory bulk CSV with per-row error rows, so a single bad input never kills a batch.
-- Provider-agnostic LLM - outreach uses any OpenAI-compatible endpoint. Default is Groq's free tier (no credit card, generous limits). Swap to OpenAI / Together / Ollama by changing one env var.
-- Fail-open AI step - if the LLM is down or the key is missing, enrichment still completes. Outreach drafts are an enhancement, not a dependency.
+## Engineering decisions
+
+- **Dual search (Serper + Tavily)** - deduplicates results, continues if one provider 5xx's. No single point of failure.
+- **Retry + exponential backoff** - PDL: 2 retries, 300ms base, 12s timeout, honors `Retry-After` on 429.
+- **Webmail rejection** - Hunter never gets called for `@gmail.com` etc., saving credits and avoiding garbage matches.
+- **Confidence per platform, not a single blended score** - lets downstream code threshold per-channel (`linkedin >= 0.85`, `twitter >= 0.7`).
+- **In-memory bulk CSV with per-row error rows** - a single bad input never kills a batch.
+- **Provider-agnostic LLM** - outreach uses any OpenAI-compatible endpoint. Default is Groq's free tier (no credit card, generous limits). Swap to OpenAI / Together / Ollama by changing one env var.
+- **Fail-open AI step** - if the LLM is down or the key is missing, enrichment still completes. Outreach drafts are an enhancement, not a dependency.
+
+## Tech stack
+
+- **Language** - TypeScript (ESM, strict typing), Node 22+
+- **Runtime** - works in the OpenClaw plugin host; CLI exposed as `/leadfind`
+- **Search** - Serper, Tavily (parallel + dedup)
+- **Enrichment** - People Data Labs, Hunter (with webmail filter)
+- **LLM** - any OpenAI-compatible endpoint (Groq Llama 3.3 70B by default)
+- **Tests** - Vitest
+- **Validation** - `@sinclair/typebox` for typed schemas
 
 ## Quick start
 
@@ -111,7 +145,7 @@ pnpm test extensions/lead-enrichment
 
 Covers the dedup logic, the bulk CSV parser/formatter, and the fallback chain.
 
-## What I'd build next
+## Roadmap
 
 - Caching layer (Redis) - same lead queried twice = 0 API calls
 - Per-provider cost meter so you can see $/lead live
