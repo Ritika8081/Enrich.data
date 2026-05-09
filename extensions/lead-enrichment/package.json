@@ -1,0 +1,14 @@
+{
+  "name": "@openclaw/lead-enrichment",
+  "version": "2026.3.13",
+  "description": "OpenClaw lead enrichment plugin — social profile discovery and salary estimation",
+  "type": "module",
+  "dependencies": {
+    "@sinclair/typebox": "0.34.48"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}

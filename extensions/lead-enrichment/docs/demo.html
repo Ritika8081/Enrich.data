@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lead Enrichment — 4 leads</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --panel-2: #1f2630;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #58a6ff;
+  --good: #3fb950;
+  --mid: #d29922;
+  --low: #f85149;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; }
+header.page { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+header.page h1 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
+header.page .sub { color: var(--muted); font-size: 13px; }
+.stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; min-width: 100px; }
+.stat .n { font-size: 20px; font-weight: 600; }
+.stat.good .n { color: var(--good); }
+.stat.bad .n { color: var(--low); }
+.stat .l { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.brief { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 24px; }
+.brief .l { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 4px; }
+.brief code { background: var(--panel-2); padding: 2px 5px; border-radius: 3px; font-size: 12px; }
+.notice { background: rgba(210, 153, 34, 0.12); border: 1px solid rgba(210, 153, 34, 0.4); color: #f0c674; border-radius: 6px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; }
+.notice strong { color: #ffd58a; }
+.grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1100px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.card header { display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center; }
+.avatar { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: white; font-weight: 600; }
+.who h2 { margin: 0; font-size: 16px; }
+.who .subtitle { font-size: 12px; color: var(--muted); }
+.who .contact { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.confidence { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 60px; }
+.confidence .bar { width: 50px; height: 4px; background: var(--panel-2); border-radius: 2px; overflow: hidden; }
+.confidence .fill { height: 100%; }
+.confidence.high .fill { background: var(--good); }
+.confidence.mid .fill { background: var(--mid); }
+.confidence.low .fill { background: var(--low); }
+.confidence .value { font-size: 11px; color: var(--muted); }
+.links { display: flex; flex-wrap: wrap; gap: 6px; }
+.links.empty { color: var(--muted); font-size: 12px; font-style: italic; }
+.link { font-size: 11px; padding: 3px 8px; border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: var(--accent); }
+.link:hover { background: var(--panel-2); }
+.row-error { font-size: 12px; color: var(--low); background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.2); border-radius: 4px; padding: 6px 10px; }
+.outreach { background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.outreach.skipped { padding: 10px 12px; color: var(--muted); font-size: 12px; }
+.outreach.skipped code { background: var(--bg); padding: 1px 4px; border-radius: 3px; }
+.outreach-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.outreach .tab { flex: 1; background: transparent; color: var(--muted); border: none; padding: 8px 12px; font-size: 12px; cursor: pointer; }
+.outreach .tab.active { color: var(--text); background: var(--panel); border-bottom: 2px solid var(--accent); margin-bottom: -1px; }
+.tab-panel { display: none; padding: 12px; }
+.tab-panel.active { display: block; }
+.subject { display: flex; gap: 8px; align-items: baseline; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed var(--border); }
+.subject .label { font-size: 10px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; }
+.subject .text { font-size: 13px; font-weight: 500; }
+.body { background: transparent; color: var(--text); margin: 0; padding: 0; font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-wrap: break-word; }
+.copy { margin-top: 10px; font-size: 11px; padding: 4px 10px; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
+.copy:hover { border-color: var(--accent); color: var(--accent); }
+.copy.copied { color: var(--good); border-color: var(--good); }
+.muted { color: var(--muted); }
+footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page">
+    <div>
+      <h1>Lead Enrichment Results</h1>
+      <div class="sub">Generated 2026-05-09T12:00:00.000Z · <span class="sub">Model: <code>llama-3.3-70b-versatile</code></span></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">4</div><div class="l">Total</div></div>
+      <div class="stat good"><div class="n">3</div><div class="l">Enriched</div></div>
+      <div class="stat bad"><div class="n">1</div><div class="l">Failed</div></div>
+    </div>
+  </header>
+  <div class="notice">SAMPLE PREVIEW — This is a synthetic illustration of the bulk-enrichment output. All names, companies, emails, and outreach drafts on this page are placeholders. They are not real people and not real LLM output. Run /leadfind on a real CSV to see the actual product.</div>
+  <div class="brief"><div class="l">Campaign brief</div><div>Cold-intro outreach for engineering leaders and founders. Warm tone, single ask: 15-minute call. (Illustrative — not a real campaign.)</div></div>
+  <div class="grid">
+    <article class="card">
+    <header>
+      <div class="avatar" style="background:hsl(355 60% 45%)">S1</div>
+      <div class="who">
+        <h2>Sample Lead 1</h2>
+        <div class="subtitle">VP Engineering at Example Corp • City A, Country A</div>
+        <div class="contact">lead-1@example.com</div>
+      </div>
+      <div class="confidence high" title="Overall match confidence">
+    <div class="bar"><div class="fill" style="width:91%"></div></div>
+    <span class="value">91%</span>
+  </div>
+    </header>
+    <div class="links"><a href="https://www.linkedin.com/in/sample-lead-1" target="_blank" rel="noopener" class="link linkedin">LinkedIn</a><a href="https://github.com/sample-lead-1" target="_blank" rel="noopener" class="link github">GitHub</a><a href="https://x.com/sample_lead_1" target="_blank" rel="noopener" class="link twitter">Twitter / X</a></div>
+    
+    <div class="outreach">
+        <div class="outreach-tabs">
+          <button class="tab active" data-tab="email-0">Email</button>
+          <button class="tab" data-tab="dm-0">LinkedIn DM</button>
+        </div>
+        <div class="tab-panel active" id="email-0">
+          <div class="subject">
+            <span class="label">Subject</span>
+            <span class="text">quick note on your engineering org</span>
+          </div>
+          <pre class="body">Hi {first_name},
+
+Noticed you&#39;ve been scaling Example Corp&#39;s engineering team. Congrats on the recent growth.
+
+I work with VP Engs going from 50 to 200 people, mostly on hiring loops and on-call ergonomics. Curious whether either of those shows up on your list right now.
+
+Would you be open to a 15-minute swap of notes next week?
+
+Thanks,
+{your_name}</pre>
+          <button class="copy" data-copy="email-body-0">Copy email</button>
+          <textarea hidden id="email-body-0">Subject: quick note on your engineering org
+
+Hi {first_name},
+
+Noticed you&#39;ve been scaling Example Corp&#39;s engineering team. Congrats on the recent growth.
+
+I work with VP Engs going from 50 to 200 people, mostly on hiring loops and on-call ergonomics. Curious whether either of those shows up on your list right now.
+
+Would you be open to a 15-minute swap of notes next week?
+
+Thanks,
+{your_name}</textarea>
+        </div>
+        <div class="tab-panel" id="dm-0">
+          <pre class="body">Hi {first_name} — saw your work scaling Example Corp&#39;s eng org. I help VPs in similar shapes; open to a 15-min chat next week?</pre>
+          <button class="copy" data-copy="dm-body-0">Copy DM</button>
+          <textarea hidden id="dm-body-0">Hi {first_name} — saw your work scaling Example Corp&#39;s eng org. I help VPs in similar shapes; open to a 15-min chat next week?</textarea>
+        </div>
+      </div>
+  </article>
+<article class="card">
+    <header>
+      <div class="avatar" style="background:hsl(356 60% 45%)">S2</div>
+      <div class="who">
+        <h2>Sample Lead 2</h2>
+        <div class="subtitle">Founder &amp; CTO at Sample Ventures • City B, Country B</div>
+        <div class="contact">lead-2@example.com</div>
+      </div>
+      <div class="confidence high" title="Overall match confidence">
+    <div class="bar"><div class="fill" style="width:84%"></div></div>
+    <span class="value">84%</span>
+  </div>
+    </header>
+    <div class="links"><a href="https://www.linkedin.com/in/sample-lead-2" target="_blank" rel="noopener" class="link linkedin">LinkedIn</a><a href="https://github.com/sample-lead-2" target="_blank" rel="noopener" class="link github">GitHub</a></div>
+    
+    <div class="outreach">
+        <div class="outreach-tabs">
+          <button class="tab active" data-tab="email-1">Email</button>
+          <button class="tab" data-tab="dm-1">LinkedIn DM</button>
+        </div>
+        <div class="tab-panel active" id="email-1">
+          <div class="subject">
+            <span class="label">Subject</span>
+            <span class="text">your team&#39;s recent product launch</span>
+          </div>
+          <pre class="body">Hi {first_name},
+
+Saw the recent launch from Sample Ventures — the architecture choices in your engineering blog stood out as genuinely well-thought-out.
+
+I&#39;ve been comparing notes with founders building similar infrastructure, mostly around scaling reliability and incident response. Would value your perspective.
+
+Do you have 15 minutes this or next week?
+
+Thanks,
+{your_name}</pre>
+          <button class="copy" data-copy="email-body-1">Copy email</button>
+          <textarea hidden id="email-body-1">Subject: your team&#39;s recent product launch
+
+Hi {first_name},
+
+Saw the recent launch from Sample Ventures — the architecture choices in your engineering blog stood out as genuinely well-thought-out.
+
+I&#39;ve been comparing notes with founders building similar infrastructure, mostly around scaling reliability and incident response. Would value your perspective.
+
+Do you have 15 minutes this or next week?
+
+Thanks,
+{your_name}</textarea>
+        </div>
+        <div class="tab-panel" id="dm-1">
+          <pre class="body">Hey {first_name} — really liked the recent Sample Ventures launch. Comparing notes with founders this month; open to a quick 15-min chat?</pre>
+          <button class="copy" data-copy="dm-body-1">Copy DM</button>
+          <textarea hidden id="dm-body-1">Hey {first_name} — really liked the recent Sample Ventures launch. Comparing notes with founders this month; open to a quick 15-min chat?</textarea>
+        </div>
+      </div>
+  </article>
+<article class="card">
+    <header>
+      <div class="avatar" style="background:hsl(357 60% 45%)">S3</div>
+      <div class="who">
+        <h2>Sample Lead 3</h2>
+        <div class="subtitle">Senior PM at Demo Labs • City C, Country C</div>
+        
+      </div>
+      <div class="confidence mid" title="Overall match confidence">
+    <div class="bar"><div class="fill" style="width:73%"></div></div>
+    <span class="value">73%</span>
+  </div>
+    </header>
+    <div class="links"><a href="https://www.linkedin.com/in/sample-lead-3" target="_blank" rel="noopener" class="link linkedin">LinkedIn</a><a href="https://x.com/sample_lead_3" target="_blank" rel="noopener" class="link twitter">Twitter / X</a></div>
+    
+    <div class="outreach">
+        <div class="outreach-tabs">
+          <button class="tab active" data-tab="email-2">Email</button>
+          <button class="tab" data-tab="dm-2">LinkedIn DM</button>
+        </div>
+        <div class="tab-panel active" id="email-2">
+          <div class="subject">
+            <span class="label">Subject</span>
+            <span class="text">demo labs onboarding redesign</span>
+          </div>
+          <pre class="body">Hi {first_name},
+
+Came across your recent post on the Demo Labs onboarding redesign — the segmented user flow is a pattern I haven&#39;t seen done well before.
+
+I&#39;m collecting notes from PMs who own activation funnels and would love to compare what&#39;s working and what isn&#39;t.
+
+Would a 15-minute call next week be doable?
+
+Thanks,
+{your_name}</pre>
+          <button class="copy" data-copy="email-body-2">Copy email</button>
+          <textarea hidden id="email-body-2">Subject: demo labs onboarding redesign
+
+Hi {first_name},
+
+Came across your recent post on the Demo Labs onboarding redesign — the segmented user flow is a pattern I haven&#39;t seen done well before.
+
+I&#39;m collecting notes from PMs who own activation funnels and would love to compare what&#39;s working and what isn&#39;t.
+
+Would a 15-minute call next week be doable?
+
+Thanks,
+{your_name}</textarea>
+        </div>
+        <div class="tab-panel" id="dm-2">
+          <pre class="body">Hi {first_name} — your Demo Labs onboarding redesign post stuck with me. Talking to activation PMs this month; open to 15 min?</pre>
+          <button class="copy" data-copy="dm-body-2">Copy DM</button>
+          <textarea hidden id="dm-body-2">Hi {first_name} — your Demo Labs onboarding redesign post stuck with me. Talking to activation PMs this month; open to 15 min?</textarea>
+        </div>
+      </div>
+  </article>
+<article class="card">
+    <header>
+      <div class="avatar" style="background:hsl(142 60% 45%)">S(</div>
+      <div class="who">
+        <h2>Sample Lead 4 (low-signal)</h2>
+        <div class="subtitle"><span class='muted'>no role/company found</span></div>
+        <div class="contact">lead-4@example.com</div>
+      </div>
+      <div class="confidence low" title="Overall match confidence">
+    <div class="bar"><div class="fill" style="width:12%"></div></div>
+    <span class="value">12%</span>
+  </div>
+    </header>
+    <div class="links empty">no public profiles found</div>
+    <div class="row-error">⚠ No confident profile match found</div>
+    <div class="outreach skipped">No outreach generated. Set <code>GROQ_API_KEY</code> and pass <code>--brief "..."</code> to enable.</div>
+  </article>
+  </div>
+  <footer>
+    Built on top of <a href="https://github.com/openclaw/openclaw" style="color: var(--accent)">OpenClaw</a> · Lead Enrichment plugin
+  </footer>
+</div>
+<script>
+document.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) return;
+  if (target.classList.contains("tab")) {
+    const tabId = target.dataset.tab;
+    if (!tabId) return;
+    const card = target.closest(".outreach");
+    if (!card) return;
+    card.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+    card.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+    target.classList.add("active");
+    const panel = card.querySelector("#" + tabId);
+    if (panel) panel.classList.add("active");
+  }
+  if (target.classList.contains("copy")) {
+    const id = target.dataset.copy;
+    if (!id) return;
+    const ta = document.getElementById(id);
+    if (!(ta instanceof HTMLTextAreaElement)) return;
+    navigator.clipboard.writeText(ta.value).then(() => {
+      target.classList.add("copied");
+      const original = target.textContent;
+      target.textContent = "Copied ✓";
+      setTimeout(() => {
+        target.classList.remove("copied");
+        target.textContent = original;
+      }, 1500);
+    }).catch(() => {});
+  }
+});
+</script>
+</body>
+</html>
